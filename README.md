@@ -118,19 +118,19 @@ usage: linky-exporter --device=DEVICE [<flags>]
 
 | Parameters           | Default      | Description                                                                                                |
 | -------------------- | ------------ | ---------------------------------------------------------------------------------------------------------- |
-| \--help              |              | Show context-sensitive                                                                                     |
-| \--version           |              | Show application version.                                                                                  |
-| \--debug             |              | Enable debug mode.                                                                                         |
-| \--address           | "0.0.0.0"    | Listen address                                                                                             |
-| \--port              | 9901         | Listen port                                                                                                |
-| \--auto              |              | Automatique mode                                                                                           |
-| \--historical        |              | Historical mode                                                                                            |
-| \--standard          |              | Standard mode                                                                                              |
-| \-d, --device=DEVICE |              | Device to read                                                                                             |
-| \-b, --baud=BAUD     | 1200         | Baud rate, 9600 for Standard, 1200 for Historical                                                          |
-| \--size=SIZE         |              | Serial frame size                                                                                          |
-| \--parity=PARITY     | "ParityNone" | Serial parity, Parity None = "N", Parity Odd = "O", Parity Even = "E", Parity Mark = M, Parity Space = "S" |
-| \--stopbits=STOPBITS | "Stop1"      | Serial stopbits, can be "Stop1", "1", "Stop1Half", "15", "Stop2", "2"                                      |
+| --help              |              | Show context-sensitive                                                                                     |
+| --version           |              | Show application version.                                                                                  |
+| --debug             |              | Enable debug mode.                                                                                         |
+| --address           | "0.0.0.0"    | Listen address                                                                                             |
+| --port              | 9901         | Listen port                                                                                                |
+| --auto              |              | Automatique mode                                                                                           |
+| --historical        |              | Historical mode                                                                                            |
+| --standard          |              | Standard mode                                                                                              |
+| -d, --device=DEVICE |              | Device to read                                                                                             |
+| -b, --baud=BAUD     | 1200         | Baud rate, 9600 for Standard, 1200 for Historical                                                          |
+| --size=SIZE         |              | Serial frame size                                                                                          |
+| --parity=PARITY     | "ParityNone" | Serial parity, Parity None = "N", Parity Odd = "O", Parity Even = "E", Parity Mark = M, Parity Space = "S" |
+| --stopbits=STOPBITS | "Stop1"      | Serial stopbits, can be "Stop1", "1", "Stop1Half", "15", "Stop2", "2"                                      |
 ```
 
 ## Metrics modes

@@ -116,8 +116,8 @@ rcctl enable linky_exporter
 ```
 usage: linky-exporter --device=DEVICE [<flags>]
 
-| Parameters           | Default      | Description                                                                                                |
-| -------------------- | ------------ | ---------------------------------------------------------------------------------------------------------- |
+| Parameters          | Default      | Description                                                                                                |
+| ------------------- | ------------ | ---------------------------------------------------------------------------------------------------------- |
 | --help              |              | Show context-sensitive                                                                                     |
 | --version           |              | Show application version.                                                                                  |
 | --debug             |              | Enable debug mode.                                                                                         |

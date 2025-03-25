@@ -1,10 +1,9 @@
 package prom
 
 import (
-	"fmt"
+	"log/slog"
 
 	"github.com/prometheus/client_golang/prometheus"
-	log "github.com/sirupsen/logrus"
 	"github.com/syberalexis/linky-exporter/pkg/core"
 )
 
@@ -148,7 +147,7 @@ func (collector *LinkyCollector) Collect(ch chan<- prometheus.Metric) {
 			timeSerie = *ConvertHistoricalTicValueToTimeSerie(*ticValues)
 		}
 	default:
-		log.Error(fmt.Errorf("Not supported mode !"))
+		slog.Error("Unable to read telemetry information: %s", err)
 	}
 
 	if err == nil {
@@ -194,7 +193,7 @@ func (collector *LinkyCollector) Collect(ch chan<- prometheus.Metric) {
 			// collector.fillProviderDayInfoMetric(ch, timeSerie)
 		}
 	} else {
-		log.Errorf("Unable to read telemetry information : %s", err)
+		slog.Error("Unable to read telemetry information : %s", err)
 	}
 }
 

@@ -2,14 +2,12 @@ package main
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
-	"path/filepath"
 
-	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 	"github.com/syberalexis/linky-exporter/pkg/core"
 	"github.com/syberalexis/linky-exporter/pkg/prom"
-	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 var (
@@ -22,66 +20,74 @@ var (
 	defaultParity    = "ParityNone"
 	defaultStopBits  = "Stop1"
 
-	app        = kingpin.New(filepath.Base(os.Args[0]), "")
-	appVersion = app.Version(version)
-	help       = app.HelpFlag.Short('h')
-	debug      = app.Flag("debug", "Enable debug mode.").Bool()
-
-	address = app.Flag("address", "Listen address").Default(fmt.Sprintf("%s", defaultAddress)).Short('a').String()
-	port    = app.Flag("port", "Listen port").Default(fmt.Sprintf("%d", defaultPort)).Short('p').Int()
-
-	auto       = app.Flag("auto", "Automatique mode").Bool()
-	historical = app.Flag("historical", "Historical mode").Bool()
-	standard   = app.Flag("standard", "Standard mode").Bool()
-	device     = app.Flag("device", "Device to read").Required().Short('d').String()
-
-	baudrate = app.Flag("baud", "Baud rate").Short('b').Int()
-	size     = app.Flag("size", "Serial frame size").Int()
-	parity   = app.Flag("parity", "Serial parity").HintOptions("ParityNone", "N", "ParityOdd", "O", "ParityEven", "E", "ParityMark", "M", "ParitySpace", "S").String()
-	stopBits = app.Flag("stopbits", "Serial stopbits").HintOptions("Stop1", "1", "Stop1Half", "15", "Stop2", "2").String()
+	// Flags
+	debug      bool
+	address    string
+	port       int
+	auto       bool
+	historical bool
+	standard   bool
+	device     string
+	baudrate   int
+	size       int
+	parity     string
+	stopBits   string
 )
 
-// Linky-exporter command main
 func main() {
-	// Main action
-	app.Action(func(c *kingpin.ParseContext) error { run(); return nil })
+	rootCmd := &cobra.Command{
+		Use:     "linky-exporter",
+		Version: version,
+		Short:   "Prometheus exporter for Linky smart meters",
+		Run: func(cmd *cobra.Command, args []string) {
+			run()
+		},
+	}
 
-	// Parsing
-	args, err := app.Parse(os.Args[1:])
+	// Define flags
+	rootCmd.PersistentFlags().BoolVar(&debug, "debug", false, "Enable debug mode")
+	rootCmd.PersistentFlags().StringVarP(&address, "address", "a", defaultAddress, "Listen address")
+	rootCmd.PersistentFlags().IntVarP(&port, "port", "p", defaultPort, "Listen port")
+	rootCmd.PersistentFlags().BoolVar(&auto, "auto", false, "Automatique mode")
+	rootCmd.PersistentFlags().BoolVar(&historical, "historical", false, "Historical mode")
+	rootCmd.PersistentFlags().BoolVar(&standard, "standard", false, "Standard mode")
+	rootCmd.PersistentFlags().StringVarP(&device, "device", "d", "", "Device to read")
+	rootCmd.MarkPersistentFlagRequired("device")
+	rootCmd.PersistentFlags().IntVarP(&baudrate, "baud", "b", 0, "Baud rate")
+	rootCmd.PersistentFlags().IntVar(&size, "size", 0, "Serial frame size")
+	rootCmd.PersistentFlags().StringVar(&parity, "parity", "", "Serial parity (ParityNone, N, ParityOdd, O, ParityEven, E, ParityMark, M, ParitySpace, S)")
+	rootCmd.PersistentFlags().StringVar(&stopBits, "stopbits", "", "Serial stopbits (Stop1, 1, Stop1Half, 15, Stop2, 2)")
 
-	if err != nil {
-		log.Error(errors.Wrapf(err, "Error parsing commandline arguments"))
-		app.Usage(os.Args[1:])
-		os.Exit(2)
-	} else {
-		kingpin.MustParse(args, err)
+	if err := rootCmd.Execute(); err != nil {
+		slog.Error("Error executing command", "error", err)
+		os.Exit(1)
 	}
 }
 
 // Main run function
 func run() {
-	if debug != nil && *debug {
-		log.SetLevel(log.DebugLevel)
-		log.Info("Debug mode enabled !")
+	if debug {
+		slog.SetLogLoggerLevel(slog.LevelDebug)
+		slog.Info("Debug mode enabled !")
 	}
 
 	// Checks before running
-	_, error := os.Stat(*device)
-	if error != nil {
-		log.Fatal(error)
+	_, err := os.Stat(device)
+	if err != nil {
+		slog.Error("Device not found", err)
 	}
 
 	// Parse parameters
-	connector := core.LinkyConnector{Device: *device}
-	detect := auto != nil && *auto
+	connector := core.LinkyConnector{Device: device}
+	detect := auto
 	if !detect {
-		if standard != nil && *standard {
+		if standard {
 			connector.Mode = core.Standard
 			connector.BaudRate = core.Standard.BaudRate
 			connector.FrameSize = core.Standard.FrameSize
 			connector.Parity = core.Standard.Parity
 			connector.StopBits = core.Standard.StopBits
-		} else if historical != nil && *historical {
+		} else if historical {
 			connector.Mode = core.Historical
 			connector.BaudRate = core.Historical.BaudRate
 			connector.FrameSize = core.Historical.FrameSize
@@ -90,32 +96,32 @@ func run() {
 		} else {
 			detect = true
 		}
-		if baudrate != nil && *baudrate != 0 {
-			connector.BaudRate = *baudrate
+		if baudrate != 0 {
+			connector.BaudRate = baudrate
 		}
-		if size != nil && *size != 0 {
-			connector.FrameSize = *size
+		if size != 0 {
+			connector.FrameSize = size
 		}
-		if parity != nil && *parity != "" {
-			log.Debug("Parse parity ", *parity)
-			connector.Parity = core.ParseParity(*parity)
+		if parity != "" {
+			slog.Debug("Parse parity ", parity)
+			connector.Parity = core.ParseParity(parity)
 		}
-		if stopBits != nil && *stopBits != "" {
-			log.Debug("Parse Stop Bits ", *stopBits)
-			connector.StopBits = core.ParseStopBits(*stopBits)
+		if stopBits != "" {
+			slog.Debug("Parse Stop Bits ", stopBits)
+			connector.StopBits = core.ParseStopBits(stopBits)
 		}
 	}
 
 	// Auto detection mode
 	if detect {
 		err := connector.Detect()
-		log.Debug("device:", connector.Device, " mode:", connector.Mode, " baudrate:", connector.BaudRate, " framesize:", connector.FrameSize, " parity:", connector.Parity, " stopbits:", connector.StopBits)
+		slog.Debug("device:", connector.Device, " mode:", connector.Mode, " baudrate:", connector.BaudRate, " framesize:", connector.FrameSize, " parity:", connector.Parity, " stopbits:", connector.StopBits)
 		if err != nil {
-			log.Fatal(err)
+			slog.Error("Error during auto detection", err)
 		}
 	}
 
 	// Run exporter
-	exporter := prom.LinkyExporter{Address: *address, Port: *port}
+	exporter := prom.LinkyExporter{Address: address, Port: port}
 	exporter.Run(connector)
 }

@@ -3,11 +3,11 @@ package core
 import (
 	"bufio"
 	"fmt"
+	"log/slog"
 	"os"
 	"regexp"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
 	"go.bug.st/serial"
 )
 
@@ -22,10 +22,10 @@ type LinkyConnector struct {
 
 // Detect serial connection mode
 func (connector *LinkyConnector) Detect() error {
-	log.Info("Trying to auto detect TIC mode...")
+	slog.Info("Trying to auto detect TIC mode...")
 
 	if connector.trySerial(Standard) {
-		log.Info("Standard Mode detected !")
+		slog.Info("Standard Mode detected !")
 		connector.Mode = Standard
 		connector.BaudRate = Standard.BaudRate
 		connector.FrameSize = Standard.FrameSize
@@ -33,11 +33,11 @@ func (connector *LinkyConnector) Detect() error {
 		connector.StopBits = Standard.StopBits
 		return nil
 	} else {
-		log.Debug("It's not standard mode !")
+		slog.Debug("It's not standard mode !")
 	}
 
 	if connector.trySerial(Historical) {
-		log.Info("Historical Mode detected !")
+		slog.Info("Historical Mode detected !")
 		connector.Mode = Historical
 		connector.BaudRate = Historical.BaudRate
 		connector.FrameSize = Historical.FrameSize
@@ -45,7 +45,7 @@ func (connector *LinkyConnector) Detect() error {
 		connector.StopBits = Historical.StopBits
 		return nil
 	} else {
-		log.Debug("It's not historical mode !")
+		slog.Debug("It's not historical mode !")
 	}
 
 	return fmt.Errorf("Impossible to auto detect TIC mode !")
@@ -62,15 +62,15 @@ func (connector LinkyConnector) trySerial(mode LinkyMode) bool {
 	reader := bufio.NewReader(stream)
 	regex, _ := regexp.Compile(`^[A-Z0-9\-+]+ +[a-zA-Z0-9 \.\-]+ +.$`)
 
-	log.Debug("Read serial data...")
+	slog.Debug("Read serial data...")
 	for i := 1; i <= 5; i++ {
 		bytes, _, _ := reader.ReadLine()
 		line := string(bytes)
-		log.Debug("Try line ", i, "/5 : ", line)
+		slog.Debug("Try line ", i, "/5 : ", line)
 		if regex.MatchString(line) {
 			return true
 		} else {
-			log.Debug("Regex not match")
+			slog.Debug("Regex not match")
 		}
 	}
 	return false
@@ -78,7 +78,7 @@ func (connector LinkyConnector) trySerial(mode LinkyMode) bool {
 
 // Read serial values
 func (connector LinkyConnector) readSerial() ([][]string, error) {
-	log.Debug("Read serial with config device:", connector.Device, " baudrate:", connector.BaudRate, " framesize:", connector.FrameSize, " parity:", connector.Parity, " stopbits:", connector.StopBits)
+	slog.Debug("Read serial with config device:", connector.Device, " baudrate:", connector.BaudRate, " framesize:", connector.FrameSize, " parity:", connector.Parity, " stopbits:", connector.StopBits)
 	m := &serial.Mode{BaudRate: connector.BaudRate, DataBits: connector.FrameSize, Parity: connector.Parity, StopBits: connector.StopBits}
 	stream, err := serial.Open(connector.Device, m)
 	if err != nil {
@@ -89,7 +89,7 @@ func (connector LinkyConnector) readSerial() ([][]string, error) {
 	started := false
 	var values [][]string
 
-	log.Debug("Read serial data...")
+	slog.Debug("Read serial data...")
 	for {
 		bytes, _, err := reader.ReadLine()
 		if err != nil {
@@ -106,7 +106,7 @@ func (connector LinkyConnector) readSerial() ([][]string, error) {
 
 		// Collect data line by line
 		if started {
-			log.Debug(line)
+			slog.Debug(line)
 			values = append(values, strings.FieldsFunc(line, func(r rune) bool { return r == 0x09 || r == ' ' }))
 		}
 
@@ -115,7 +115,7 @@ func (connector LinkyConnector) readSerial() ([][]string, error) {
 			started = true
 		}
 	}
-	log.Debug("Read serial data ended !")
+	slog.Debug("Read serial data ended !")
 
 	return values, nil
 }
@@ -125,7 +125,7 @@ func (connector LinkyConnector) GetLastHistoricalTicValue() (*HistoricalTicValue
 	lines, err := connector.readSerial()
 
 	if err != nil {
-		log.Errorf("Failed to read historical serial : %s", err)
+		slog.Error("Failed to read historical serial : %s", err)
 		return nil, err
 	}
 
@@ -142,7 +142,7 @@ func (connector LinkyConnector) GetLastStandardTicValue() (*StandardTicValue, er
 	lines, err := connector.readSerial()
 
 	if err != nil {
-		log.Errorf("Failed to read standard serial : %s", err)
+		slog.Error("Failed to read standard serial : %s", err)
 		return nil, err
 	}
 
@@ -173,7 +173,7 @@ func ParseParity(value string) (parity serial.Parity) {
 		parity = serial.SpaceParity
 		break
 	default:
-		log.Error(fmt.Errorf("Impossible to parse Parity named : %s", value))
+		slog.Error("Impossible to parse Parity named : %s", value)
 		os.Exit(3)
 	}
 	return
@@ -192,7 +192,7 @@ func ParseStopBits(value string) (stopBits serial.StopBits) {
 		stopBits = serial.TwoStopBits
 		break
 	default:
-		log.Error(fmt.Errorf("Impossible to parse StopBits named : %s", value))
+		slog.Error("Impossible to parse StopBits named : %s", value)
 		os.Exit(3)
 	}
 	return

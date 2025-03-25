@@ -2,11 +2,11 @@ package prom
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	log "github.com/sirupsen/logrus"
 	"github.com/syberalexis/linky-exporter/pkg/core"
 )
 
@@ -18,10 +18,13 @@ type LinkyExporter struct {
 
 // Run method to run http exporter server
 func (exporter *LinkyExporter) Run(connector core.LinkyConnector) {
-	log.Info(fmt.Sprintf("Beginning to serve on port :%d", exporter.Port))
+	slog.Info(fmt.Sprintf("Beginning to serve on port :%d", exporter.Port))
 
 	prometheus.MustRegister(NewLinkyCollector(connector))
 	http.Handle("/metrics", promhttp.Handler())
 
-	log.Fatal(http.ListenAndServe(fmt.Sprintf("%s:%d", exporter.Address, exporter.Port), nil))
+	err := http.ListenAndServe(fmt.Sprintf("%s:%d", exporter.Address, exporter.Port), nil)
+	if err != nil {
+		slog.Error(err.Error())
+	}
 }

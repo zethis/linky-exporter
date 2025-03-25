@@ -7,7 +7,7 @@ import (
 )
 
 // Convert (with construction) Historical Tic Value to Time serie value
-func ConvertHistoricalTicValueToTimeSerie(historicalValues core.HistoricalTicValue) *LinkyTimeSerie {
+func ConvertHistoricalTicValueToTimeSerie(historicalValues *core.HistoricalTicValue) *LinkyTimeSerie {
 	timeSerie := &LinkyTimeSerie{
 		LinkyId:          historicalValues.Adco,
 		Version:          "1",
@@ -60,7 +60,7 @@ func ConvertHistoricalTicValueToTimeSerie(historicalValues core.HistoricalTicVal
 }
 
 // Convert Standard Tic Value to Time serie value
-func ConvertStandardTicValueToTimeSerie(standardValues core.StandardTicValue) *LinkyTimeSerie {
+func ConvertStandardTicValueToTimeSerie(standardValues *core.StandardTicValue) *LinkyTimeSerie {
 	return &LinkyTimeSerie{
 		LinkyId:                            standardValues.Adsc,
 		Version:                            standardValues.Vtic,

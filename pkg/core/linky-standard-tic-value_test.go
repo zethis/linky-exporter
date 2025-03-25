@@ -53,7 +53,7 @@ func TestParseParamTableDrivenRelais(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		testname := fmt.Sprintf("%s", tt.value)
+		testname := tt.value
 		t.Run(testname, func(t *testing.T) {
 			// When
 			tic.ParseParam("RELAIS", []string{tt.value, "!"})
@@ -101,7 +101,7 @@ func TestParseDateTableDrivenRelais(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		testname := fmt.Sprintf("%s", tt.value)
+		testname := tt.value
 		t.Run(testname, func(t *testing.T) {
 			// When
 			tic.parseDate(tt.value)
@@ -166,9 +166,6 @@ func TestParseParam(t *testing.T) {
 	}
 
 	// Then
-	// if tic.Date.UnixMilli() != 1668350147 {
-	// 	t.Errorf("Expected date millis %d but got %d", 1668350147, tic.Date.UnixMilli())
-	// }
 	if tic.Relai1 != 1 {
 		t.Error("Relais 1 not good")
 	}

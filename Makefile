@@ -42,3 +42,6 @@ docker:
 ifneq ($(VERSION),)
 	docker tag syberalexis/linky-exporter syberalexis/linky-exporter:$(VERSION)
 endif
+
+lint: ## go linting. Update and use specific lint tool and options
+	golangci-lint run

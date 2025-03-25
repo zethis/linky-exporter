@@ -48,11 +48,11 @@ func (connector *LinkyConnector) Detect() error {
 		slog.Debug("It's not historical mode !")
 	}
 
-	return fmt.Errorf("Impossible to auto detect TIC mode !")
+	return fmt.Errorf("impossible to auto detect TIC mode ")
 }
 
 // Try serial connection and reading
-func (connector LinkyConnector) trySerial(mode LinkyMode) bool {
+func (connector *LinkyConnector) trySerial(mode LinkyMode) bool {
 	m := &serial.Mode{BaudRate: mode.BaudRate, DataBits: mode.FrameSize, Parity: mode.Parity, StopBits: mode.StopBits}
 	stream, err := serial.Open(connector.Device, m)
 	if err != nil {
@@ -60,13 +60,13 @@ func (connector LinkyConnector) trySerial(mode LinkyMode) bool {
 	}
 
 	reader := bufio.NewReader(stream)
-	regex, _ := regexp.Compile(`^[A-Z0-9\-+]+ +[a-zA-Z0-9 \.\-]+ +.$`)
+	regex := regexp.MustCompile(`^[A-Z0-9\-+]+ +[a-zA-Z0-9 .\-]+ +.$`)
 
 	slog.Debug("Read serial data...")
 	for i := 1; i <= 5; i++ {
 		bytes, _, _ := reader.ReadLine()
 		line := string(bytes)
-		slog.Debug("Try line ", i, "/5 : ", line)
+		slog.Debug("Try line", "number", i, "total", 5, "content", line)
 		if regex.MatchString(line) {
 			return true
 		} else {
@@ -76,9 +76,20 @@ func (connector LinkyConnector) trySerial(mode LinkyMode) bool {
 	return false
 }
 
-// Read serial values
-func (connector LinkyConnector) readSerial() ([][]string, error) {
-	slog.Debug("Read serial with config device:", connector.Device, " baudrate:", connector.BaudRate, " framesize:", connector.FrameSize, " parity:", connector.Parity, " stopbits:", connector.StopBits)
+// ASCII control characters used in serial communication
+const (
+	STX = 0x02 // Start of Text - marks the beginning of a data block
+	ETX = 0x03 // End of Text - marks the end of a data block
+)
+
+// readSerial values
+func (connector *LinkyConnector) readSerial() ([][]string, error) {
+	slog.Debug("Read serial with config",
+		"device", connector.Device,
+		"baudrate", connector.BaudRate,
+		"framesize", connector.FrameSize,
+		"parity", connector.Parity,
+		"stopbits", connector.StopBits)
 	m := &serial.Mode{BaudRate: connector.BaudRate, DataBits: connector.FrameSize, Parity: connector.Parity, StopBits: connector.StopBits}
 	stream, err := serial.Open(connector.Device, m)
 	if err != nil {
@@ -99,8 +110,11 @@ func (connector LinkyConnector) readSerial() ([][]string, error) {
 		line := string(bytes)
 
 		// End loop when block ended
-		if started && strings.ContainsRune(line, 0x03) {
-			stream.Close()
+		if started && strings.ContainsRune(line, ETX) {
+			err = stream.Close()
+			if err != nil {
+				slog.Error("Failed to close serial", "error", err)
+			}
 			break
 		}
 
@@ -111,7 +125,7 @@ func (connector LinkyConnector) readSerial() ([][]string, error) {
 		}
 
 		// Start reading data when block started
-		if strings.ContainsRune(line, 0x02) {
+		if strings.ContainsRune(line, STX) {
 			started = true
 		}
 	}
@@ -120,12 +134,12 @@ func (connector LinkyConnector) readSerial() ([][]string, error) {
 	return values, nil
 }
 
-// Return last serial Historical TIC
-func (connector LinkyConnector) GetLastHistoricalTicValue() (*HistoricalTicValue, error) {
+// GetLastHistoricalTicValue return last serial Historical TIC
+func (connector *LinkyConnector) GetLastHistoricalTicValue() (*HistoricalTicValue, error) {
 	lines, err := connector.readSerial()
 
 	if err != nil {
-		slog.Error("Failed to read historical serial : %s", err)
+		slog.Error("Failed to read historical serial", "error", err)
 		return nil, err
 	}
 
@@ -137,12 +151,12 @@ func (connector LinkyConnector) GetLastHistoricalTicValue() (*HistoricalTicValue
 	return &values, nil
 }
 
-// Return last serial Standard TIC
-func (connector LinkyConnector) GetLastStandardTicValue() (*StandardTicValue, error) {
+// GetLastStandardTicValue return last serial Standard TIC
+func (connector *LinkyConnector) GetLastStandardTicValue() (*StandardTicValue, error) {
 	lines, err := connector.readSerial()
 
 	if err != nil {
-		slog.Error("Failed to read standard serial : %s", err)
+		slog.Error("Failed to read standard serial", "error", err)
 		return nil, err
 	}
 
@@ -154,45 +168,42 @@ func (connector LinkyConnector) GetLastStandardTicValue() (*StandardTicValue, er
 	return &values, nil
 }
 
-// Parse parity from string to serial object
+// ParseParity from string to serial object
 func ParseParity(value string) (parity serial.Parity) {
 	switch value {
 	case "ParityNone", "N":
 		parity = serial.NoParity
-		break
+
 	case "ParityOdd", "O":
 		parity = serial.OddParity
-		break
+
 	case "ParityEven", "E":
 		parity = serial.EvenParity
-		break
+
 	case "ParityMark", "M":
 		parity = serial.MarkParity
-		break
+
 	case "ParitySpace", "S":
 		parity = serial.SpaceParity
-		break
+
 	default:
-		slog.Error("Impossible to parse Parity named : %s", value)
+		slog.Error("Impossible to parse Parity", "error", value)
 		os.Exit(3)
 	}
 	return
 }
 
-// Parse stop bits from string to serial object
+// ParseStopBits from string to serial object
 func ParseStopBits(value string) (stopBits serial.StopBits) {
 	switch value {
 	case "Stop1", "1":
 		stopBits = serial.OneStopBit
-		break
 	case "Stop1Half", "15":
 		stopBits = serial.OnePointFiveStopBits
-		break
 	case "Stop2", "2":
 		stopBits = serial.TwoStopBits
-		break
 	default:
-		slog.Error("Impossible to parse StopBits named : %s", value)
+		slog.Error("Impossible to parse StopBits", "value", value)
 		os.Exit(3)
 	}
 	return

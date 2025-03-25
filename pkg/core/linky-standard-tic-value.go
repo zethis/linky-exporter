@@ -1,6 +1,7 @@
 package core
 
 import (
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -78,14 +79,14 @@ type StandardTicValue struct {
 	CPLSyncStatus                      uint8     // Status Synchronisation CPL
 	TempoContractColorStatus           uint8     // Status Couleur du jour pour le contrat historique tempo
 	TempoContractNextDayColorStatus    uint8     // Status Couleur du lendemain pour le contrat historique tempo
-	MovingPeakNoticeStatus             uint8     // Status Préavis pointes mobiles
-	MovingPeakStatus                   uint8     // Status Pointe mobile (PM)
-	Dpm1                               int8      // Début Pointe Mobile 1
-	Fpm1                               int8      // Fin Pointe Mobile 1
-	Dpm2                               int8      // Début Pointe Mobile 2
-	Fpm2                               int8      // Fin Pointe Mobile 2
-	Dpm3                               int8      // Début Pointe Mobile 3
-	Fpm3                               int8      // Fin Pointe Mobile 3
+	MovingPeakNoticeStatus             uint8     // Status Préavis pointersrs mobiles
+	MovingPeakStatus                   uint8     // Status pointers mobile (PM)
+	Dpm1                               int8      // Début pointers Mobile 1
+	Fpm1                               int8      // Fin pointers Mobile 1
+	Dpm2                               int8      // Début pointers Mobile 2
+	Fpm2                               int8      // Fin pointers Mobile 2
+	Dpm3                               int8      // Début pointers Mobile 3
+	Fpm3                               int8      // Fin pointers Mobile 3
 	Msg1                               string    // Message court
 	Msg2                               string    // Message Ultra court
 	Prm                                string    // PRM
@@ -104,6 +105,38 @@ type StandardTicValue struct {
 	Ppointe                            string    // Profil du prochain jour de pointe
 }
 
+// safeUint64ToInt64 converts uint64 to int64 with overflow check
+func safeUint64ToInt64(val uint64) int64 {
+	if val > math.MaxInt64 {
+		return math.MaxInt64
+	}
+	return safeUint64ToInt64(val)
+}
+
+// safeUint64ToInt32 converts uint64 to int32 with overflow check
+func safeUint64ToInt32(val uint64) int32 {
+	if val > math.MaxInt32 {
+		return math.MaxInt32
+	}
+	return safeUint64ToInt32(val)
+}
+
+// safeUint64ToInt16 converts uint64 to int16 with overflow check
+func safeUint64ToInt16(val uint64) int16 {
+	if val > math.MaxInt16 {
+		return math.MaxInt16
+	}
+	return safeUint64ToInt16(val)
+}
+
+// safeUint64ToInt8 converts uint64 to int8 with overflow check
+func safeUint64ToInt8(val uint64) int8 {
+	if val > math.MaxInt8 {
+		return math.MaxInt8
+	}
+	return safeUint64ToInt8(val)
+}
+
 // Parse parameter with name and value
 func (tic *StandardTicValue) ParseParam(name string, values []string) {
 	if len(values) == 0 {
@@ -113,278 +146,253 @@ func (tic *StandardTicValue) ParseParam(name string, values []string) {
 	switch strings.ToLower(name) {
 	case "adsc":
 		tic.Adsc = values[0]
-		break
 	case "vtic":
 		tic.Vtic = values[0]
-		break
 	case "date":
 		tic.parseDate(values[1])
-		break
 	case "ngtf":
 		tic.Ngtf = values[0]
-		break
 	case "ltarf":
 		tic.Ltarf = values[0]
-		break
 	case "east":
 		val, _ := strconv.ParseUint(values[0], 10, 32)
-		tic.East = int32(val)
-		break
+		tic.East = safeUint64ToInt32(val)
 	case "easf01":
 		val, _ := strconv.ParseUint(values[0], 10, 32)
-		tic.Easf01 = int32(val)
-		break
+		tic.Easf01 = safeUint64ToInt32(val)
 	case "easf02":
 		val, _ := strconv.ParseUint(values[0], 10, 32)
-		tic.Easf02 = int32(val)
-		break
+		tic.Easf02 = safeUint64ToInt32(val)
 	case "easf03":
 		val, _ := strconv.ParseUint(values[0], 10, 32)
-		tic.Easf03 = int32(val)
-		break
+		tic.Easf03 = safeUint64ToInt32(val)
 	case "easf04":
 		val, _ := strconv.ParseUint(values[0], 10, 32)
-		tic.Easf04 = int32(val)
-		break
+		tic.Easf04 = safeUint64ToInt32(val)
 	case "easf05":
 		val, _ := strconv.ParseUint(values[0], 10, 32)
-		tic.Easf05 = int32(val)
-		break
+		tic.Easf05 = safeUint64ToInt32(val)
 	case "easf06":
 		val, _ := strconv.ParseUint(values[0], 10, 32)
-		tic.Easf06 = int32(val)
-		break
+		tic.Easf06 = safeUint64ToInt32(val)
 	case "easf07":
 		val, _ := strconv.ParseUint(values[0], 10, 32)
-		tic.Easf07 = int32(val)
-		break
+		tic.Easf07 = safeUint64ToInt32(val)
 	case "easf08":
 		val, _ := strconv.ParseUint(values[0], 10, 32)
-		tic.Easf08 = int32(val)
-		break
+		tic.Easf08 = safeUint64ToInt32(val)
 	case "easf09":
 		val, _ := strconv.ParseUint(values[0], 10, 32)
-		tic.Easf09 = int32(val)
-		break
+		tic.Easf09 = safeUint64ToInt32(val)
 	case "easf10":
 		val, _ := strconv.ParseUint(values[0], 10, 32)
-		tic.Easf10 = int32(val)
-		break
+		tic.Easf10 = safeUint64ToInt32(val)
 	case "easd01":
 		val, _ := strconv.ParseUint(values[0], 10, 32)
-		tic.Easd01 = int32(val)
-		break
+		tic.Easd01 = safeUint64ToInt32(val)
 	case "easd02":
 		val, _ := strconv.ParseUint(values[0], 10, 32)
-		tic.Easd02 = int32(val)
-		break
+		tic.Easd02 = safeUint64ToInt32(val)
 	case "easd03":
 		val, _ := strconv.ParseUint(values[0], 10, 32)
-		tic.Easd03 = int32(val)
-		break
+		tic.Easd03 = safeUint64ToInt32(val)
 	case "easd04":
 		val, _ := strconv.ParseUint(values[0], 10, 32)
-		tic.Easd04 = int32(val)
-		break
+		tic.Easd04 = safeUint64ToInt32(val)
 	case "eait":
 		val, _ := strconv.ParseUint(values[0], 10, 32)
-		tic.Eait = int32(val)
-		break
+		tic.Eait = safeUint64ToInt32(val)
 	case "erq1":
 		val, _ := strconv.ParseUint(values[0], 10, 32)
-		tic.Erq1 = int32(val)
-		break
+		tic.Erq1 = safeUint64ToInt32(val)
 	case "erq2":
 		val, _ := strconv.ParseUint(values[0], 10, 32)
-		tic.Erq2 = int32(val)
-		break
+		tic.Erq2 = safeUint64ToInt32(val)
 	case "erq3":
 		val, _ := strconv.ParseUint(values[0], 10, 32)
-		tic.Erq3 = int32(val)
-		break
+		tic.Erq3 = safeUint64ToInt32(val)
 	case "erq4":
 		val, _ := strconv.ParseUint(values[0], 10, 32)
-		tic.Erq4 = int32(val)
-		break
+		tic.Erq4 = safeUint64ToInt32(val)
+
 	case "irms1":
 		val, _ := strconv.ParseUint(values[0], 10, 16)
-		tic.Irms1 = int16(val)
-		break
+		tic.Irms1 = safeUint64ToInt16(val)
+
 	case "irms2":
 		val, _ := strconv.ParseUint(values[0], 10, 16)
-		tic.Irms2 = int16(val)
-		break
+		tic.Irms2 = safeUint64ToInt16(val)
+
 	case "irms3":
 		val, _ := strconv.ParseUint(values[0], 10, 16)
-		tic.Irms3 = int16(val)
-		break
+		tic.Irms3 = safeUint64ToInt16(val)
+
 	case "urms1":
 		val, _ := strconv.ParseUint(values[0], 10, 16)
-		tic.Urms1 = int16(val)
-		break
+		tic.Urms1 = safeUint64ToInt16(val)
+
 	case "urms2":
 		val, _ := strconv.ParseUint(values[0], 10, 16)
-		tic.Urms2 = int16(val)
-		break
+		tic.Urms2 = safeUint64ToInt16(val)
+
 	case "urms3":
 		val, _ := strconv.ParseUint(values[0], 10, 16)
-		tic.Urms3 = int16(val)
-		break
+		tic.Urms3 = safeUint64ToInt16(val)
+
 	case "pref":
 		val, _ := strconv.ParseUint(values[0], 10, 8)
-		tic.Pref = int8(val)
-		break
+		tic.Pref = safeUint64ToInt8(val)
+
 	case "pcoup":
 		val, _ := strconv.ParseUint(values[0], 10, 8)
-		tic.Pcoup = int8(val)
-		break
+		tic.Pcoup = safeUint64ToInt8(val)
+
 	case "sinsts":
 		val, _ := strconv.ParseUint(values[0], 10, 32)
-		tic.Sinsts = int32(val)
-		break
+		tic.Sinsts = safeUint64ToInt32(val)
+
 	case "sinsts1":
 		val, _ := strconv.ParseUint(values[0], 10, 32)
-		tic.Sinsts1 = int32(val)
-		break
+		tic.Sinsts1 = safeUint64ToInt32(val)
+
 	case "sinsts2":
 		val, _ := strconv.ParseUint(values[0], 10, 32)
-		tic.Sinsts2 = int32(val)
-		break
+		tic.Sinsts2 = safeUint64ToInt32(val)
+
 	case "sinsts3":
 		val, _ := strconv.ParseUint(values[0], 10, 32)
-		tic.Sinsts3 = int32(val)
-		break
+		tic.Sinsts3 = safeUint64ToInt32(val)
+
 	case "smaxsn":
 		val, _ := strconv.ParseUint(values[1], 10, 32)
-		tic.Smaxsn = int32(val)
-		break
+		tic.Smaxsn = safeUint64ToInt32(val)
+
 	case "smaxsn1":
 		val, _ := strconv.ParseUint(values[1], 10, 32)
-		tic.Smaxsn1 = int32(val)
-		break
+		tic.Smaxsn1 = safeUint64ToInt32(val)
+
 	case "smaxsn2":
 		val, _ := strconv.ParseUint(values[1], 10, 32)
-		tic.Smaxsn2 = int32(val)
-		break
+		tic.Smaxsn2 = safeUint64ToInt32(val)
+
 	case "smaxsn3":
 		val, _ := strconv.ParseUint(values[1], 10, 32)
-		tic.Smaxsn3 = int32(val)
-		break
+		tic.Smaxsn3 = safeUint64ToInt32(val)
+
 	case "smaxsn-1":
 		val, _ := strconv.ParseUint(values[1], 10, 32)
-		tic.Smaxsnly = int32(val)
-		break
+		tic.Smaxsnly = safeUint64ToInt32(val)
+
 	case "smaxsn1-1":
 		val, _ := strconv.ParseUint(values[1], 10, 32)
-		tic.Smaxsn1ly = int32(val)
-		break
+		tic.Smaxsn1ly = safeUint64ToInt32(val)
+
 	case "smaxsn2-1":
 		val, _ := strconv.ParseUint(values[1], 10, 32)
-		tic.Smaxsn2ly = int32(val)
-		break
+		tic.Smaxsn2ly = safeUint64ToInt32(val)
+
 	case "smaxsn3-1":
 		val, _ := strconv.ParseUint(values[1], 10, 32)
-		tic.Smaxsn3ly = int32(val)
-		break
+		tic.Smaxsn3ly = safeUint64ToInt32(val)
+
 	case "sinsti":
 		val, _ := strconv.ParseUint(values[0], 10, 32)
-		tic.Sinsti = int32(val)
-		break
+		tic.Sinsti = safeUint64ToInt32(val)
+
 	case "smaxin":
 		val, _ := strconv.ParseUint(values[1], 10, 32)
-		tic.Smaxin = int32(val)
-		break
+		tic.Smaxin = safeUint64ToInt32(val)
+
 	case "smaxin-1":
 		val, _ := strconv.ParseUint(values[1], 10, 32)
-		tic.Smaxinly = int32(val)
-		break
+		tic.Smaxinly = safeUint64ToInt32(val)
+
 	case "ccasn":
 		val, _ := strconv.ParseUint(values[1], 10, 32)
-		tic.Ccasn = int32(val)
-		break
+		tic.Ccasn = safeUint64ToInt32(val)
+
 	case "ccasn-1":
 		val, _ := strconv.ParseUint(values[1], 10, 32)
-		tic.Ccasnly = int32(val)
-		break
+		tic.Ccasnly = safeUint64ToInt32(val)
+
 	case "ccain":
 		val, _ := strconv.ParseUint(values[1], 10, 32)
-		tic.Ccain = int32(val)
-		break
+		tic.Ccain = safeUint64ToInt32(val)
+
 	case "ccain-1":
 		val, _ := strconv.ParseUint(values[1], 10, 32)
-		tic.Ccainly = int32(val)
-		break
+		tic.Ccainly = safeUint64ToInt32(val)
+
 	case "umoy1":
 		val, _ := strconv.ParseUint(values[1], 10, 16)
-		tic.Umoy1 = int16(val)
-		break
+		tic.Umoy1 = safeUint64ToInt16(val)
+
 	case "umoy2":
 		val, _ := strconv.ParseUint(values[1], 10, 16)
-		tic.Umoy2 = int16(val)
-		break
+		tic.Umoy2 = safeUint64ToInt16(val)
+
 	case "umoy3":
 		val, _ := strconv.ParseUint(values[1], 10, 16)
-		tic.Umoy3 = int16(val)
-		break
+		tic.Umoy3 = safeUint64ToInt16(val)
+
 	case "status":
 		val, _ := strconv.ParseInt(values[0], 10, 64)
-		tic.parseStatus(int64(val))
-		break
+		tic.parseStatus(val)
+
 	case "dpm1":
 		val, _ := strconv.ParseUint(values[1], 10, 8)
-		tic.Dpm1 = int8(val)
-		break
+		tic.Dpm1 = safeUint64ToInt8(val)
+
 	case "fpm1":
 		val, _ := strconv.ParseUint(values[1], 10, 8)
-		tic.Fpm1 = int8(val)
-		break
+		tic.Fpm1 = safeUint64ToInt8(val)
+
 	case "dpm2":
 		val, _ := strconv.ParseUint(values[1], 10, 8)
-		tic.Dpm2 = int8(val)
-		break
+		tic.Dpm2 = safeUint64ToInt8(val)
+
 	case "fpm2":
 		val, _ := strconv.ParseUint(values[1], 10, 8)
-		tic.Fpm2 = int8(val)
-		break
+		tic.Fpm2 = safeUint64ToInt8(val)
+
 	case "dpm3":
 		val, _ := strconv.ParseUint(values[1], 10, 8)
-		tic.Dpm3 = int8(val)
-		break
+		tic.Dpm3 = safeUint64ToInt8(val)
+
 	case "fpm3":
 		val, _ := strconv.ParseUint(values[1], 10, 8)
-		tic.Fpm3 = int8(val)
-		break
+		tic.Fpm3 = safeUint64ToInt8(val)
+
 	case "msg1":
 		tic.Msg1 = strings.Join(values[:len(values)-1], " ")
-		break
+
 	case "msg2":
 		tic.Msg2 = strings.Join(values[:len(values)-1], " ")
-		break
+
 	case "prm":
 		tic.Prm = values[0]
-		break
+
 	case "relais":
 		val, _ := strconv.ParseUint(values[0], 10, 64)
-		tic.parseRelais(int64(val))
-		break
+		tic.parseRelais(safeUint64ToInt64(val))
+
 	case "ntarf":
 		val, _ := strconv.ParseUint(values[0], 10, 8)
-		tic.Ntarf = int8(val)
-		break
+		tic.Ntarf = safeUint64ToInt8(val)
+
 	case "njourf":
 		val, _ := strconv.ParseUint(values[0], 10, 8)
-		tic.Njourf = int8(val)
-		break
+		tic.Njourf = safeUint64ToInt8(val)
+
 	case "njourf+1":
 		val, _ := strconv.ParseUint(values[0], 10, 8)
-		tic.Njourfnd = int8(val)
-		break
+		tic.Njourfnd = safeUint64ToInt8(val)
+
 	case "pjourf+1":
 		tic.Pjourfnd = values[0]
-		break
+
 	case "ppointe":
 		tic.Ppointe = values[0]
-		break
 	}
 }
 
@@ -392,18 +400,22 @@ func (tic *StandardTicValue) ParseParam(name string, values []string) {
 func (values *StandardTicValue) parseDate(value string) {
 	season := strings.ToLower(value[0:1])
 	if season == "h" {
-		value = value + "+01"
+		value += "+01"
 	} else {
-		value = value + "+02"
+		value += "+02"
 	}
 
 	val, _ := time.Parse("060102150405-07", value[1:])
 	values.Date = val
 }
 
+const (
+	StatusBitCount = 32
+)
+
 // Parse TIC Status information into real status representation
 func (values *StandardTicValue) parseStatus(value int64) {
-	binaries := addZerosPrefix(strconv.FormatInt(value, 2), 32)
+	binaries := addZerosPrefix(strconv.FormatInt(value, 2), StatusBitCount)
 
 	// Bit 0
 	values.DryContactStatus = convertStatusToUint(string(binaries[31]))
@@ -445,9 +457,13 @@ func (values *StandardTicValue) parseStatus(value int64) {
 	values.MovingPeakStatus = convertStatusToUint(binaries[0:1])
 }
 
+const (
+	RelayBitCount = 8
+)
+
 // Parse TIC Relais information into real representation
 func (values *StandardTicValue) parseRelais(value int64) {
-	binaries := addZerosPrefix(strconv.FormatInt(value, 2), 8)
+	binaries := addZerosPrefix(strconv.FormatInt(value, 2), RelayBitCount)
 
 	// Bit 0
 	values.Relai1 = convertRelayValue(binaries[7])
@@ -467,14 +483,12 @@ func (values *StandardTicValue) parseRelais(value int64) {
 	values.Relai8 = convertRelayValue(binaries[0])
 }
 
-// Add multiple zero defined length prefix to represent a full binary value
+// Add zeros prefix to represent a full binary value of specified length
 func addZerosPrefix(value string, count int) string {
-	var fullValue []string
-	for i := 0; i < count-len(value); i++ {
-		fullValue = append(fullValue, "0")
+	if len(value) >= count {
+		return value
 	}
-	fullValue = append(fullValue, value)
-	return strings.Join(fullValue[:], "")
+	return strings.Repeat("0", count-len(value)) + value
 }
 
 // Convert one status string value to uint8

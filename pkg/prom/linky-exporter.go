@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -17,14 +18,22 @@ type LinkyExporter struct {
 }
 
 // Run method to run http exporter server
-func (exporter *LinkyExporter) Run(connector core.LinkyConnector) {
+func (exporter *LinkyExporter) Run(connector *core.LinkyConnector) {
 	slog.Info(fmt.Sprintf("Beginning to serve on port :%d", exporter.Port))
 
 	prometheus.MustRegister(NewLinkyCollector(connector))
 	http.Handle("/metrics", promhttp.Handler())
 
-	err := http.ListenAndServe(fmt.Sprintf("%s:%d", exporter.Address, exporter.Port), nil)
+	// Create server with timeouts
+	server := &http.Server{
+		Addr:         fmt.Sprintf("%s:%d", exporter.Address, exporter.Port),
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  60 * time.Second,
+	}
+
+	err := server.ListenAndServe()
 	if err != nil {
-		slog.Error(err.Error())
+		slog.Error("Error while serving metrics", "error", err)
 	}
 }

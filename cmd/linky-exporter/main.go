@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log/slog"
 	"os"
 
@@ -28,7 +27,7 @@ var (
 	historical bool
 	standard   bool
 	device     string
-	baudrate   int
+	baudRate   int
 	size       int
 	parity     string
 	stopBits   string
@@ -46,17 +45,34 @@ func main() {
 
 	// Define flags
 	rootCmd.PersistentFlags().BoolVar(&debug, "debug", false, "Enable debug mode")
-	rootCmd.PersistentFlags().StringVarP(&address, "address", "a", defaultAddress, "Listen address")
+	rootCmd.PersistentFlags().StringVarP(
+		&address,
+		"address",
+		"a",
+		defaultAddress,
+		"Listen address")
 	rootCmd.PersistentFlags().IntVarP(&port, "port", "p", defaultPort, "Listen port")
 	rootCmd.PersistentFlags().BoolVar(&auto, "auto", false, "Automatique mode")
 	rootCmd.PersistentFlags().BoolVar(&historical, "historical", false, "Historical mode")
 	rootCmd.PersistentFlags().BoolVar(&standard, "standard", false, "Standard mode")
 	rootCmd.PersistentFlags().StringVarP(&device, "device", "d", "", "Device to read")
-	rootCmd.MarkPersistentFlagRequired("device")
-	rootCmd.PersistentFlags().IntVarP(&baudrate, "baud", "b", 0, "Baud rate")
-	rootCmd.PersistentFlags().IntVar(&size, "size", 0, "Serial frame size")
-	rootCmd.PersistentFlags().StringVar(&parity, "parity", "", "Serial parity (ParityNone, N, ParityOdd, O, ParityEven, E, ParityMark, M, ParitySpace, S)")
-	rootCmd.PersistentFlags().StringVar(&stopBits, "stopbits", "", "Serial stopbits (Stop1, 1, Stop1Half, 15, Stop2, 2)")
+	err := rootCmd.MarkPersistentFlagRequired("device")
+	if err != nil {
+		slog.Error("Error during flag parsing", "error", err)
+		os.Exit(1)
+	}
+	rootCmd.PersistentFlags().IntVarP(&baudRate, "baud", "b", defaultBaudRate, "Baud rate")
+	rootCmd.PersistentFlags().IntVar(&size, "size", defaultFrameSize, "Serial frame size")
+	rootCmd.PersistentFlags().StringVar(
+		&parity,
+		"parity",
+		defaultParity,
+		"Serial parity (ParityNone, N, ParityOdd, O, ParityEven, E, ParityMark, M, ParitySpace, S)")
+	rootCmd.PersistentFlags().StringVar(
+		&stopBits,
+		"stopbits",
+		defaultStopBits,
+		"Serial stopbits (Stop1, 1, Stop1Half, 15, Stop2, 2)")
 
 	if err := rootCmd.Execute(); err != nil {
 		slog.Error("Error executing command", "error", err)
@@ -74,7 +90,7 @@ func run() {
 	// Checks before running
 	_, err := os.Stat(device)
 	if err != nil {
-		slog.Error("Device not found", err)
+		slog.Error("Device not found", "error", err)
 	}
 
 	// Parse parameters
@@ -96,18 +112,18 @@ func run() {
 		} else {
 			detect = true
 		}
-		if baudrate != 0 {
-			connector.BaudRate = baudrate
+		if baudRate != 0 {
+			connector.BaudRate = baudRate
 		}
 		if size != 0 {
 			connector.FrameSize = size
 		}
 		if parity != "" {
-			slog.Debug("Parse parity ", parity)
+			slog.Debug("Parsing parity", "parity", parity)
 			connector.Parity = core.ParseParity(parity)
 		}
 		if stopBits != "" {
-			slog.Debug("Parse Stop Bits ", stopBits)
+			slog.Debug("Parsing stop bits configuration", "stopBits", stopBits)
 			connector.StopBits = core.ParseStopBits(stopBits)
 		}
 	}
@@ -115,13 +131,19 @@ func run() {
 	// Auto detection mode
 	if detect {
 		err := connector.Detect()
-		slog.Debug("device:", connector.Device, " mode:", connector.Mode, " baudrate:", connector.BaudRate, " framesize:", connector.FrameSize, " parity:", connector.Parity, " stopbits:", connector.StopBits)
+		slog.Debug("Connector configuration",
+			"device", connector.Device,
+			"mode", connector.Mode,
+			"baudrate", connector.BaudRate,
+			"framesize", connector.FrameSize,
+			"parity", connector.Parity,
+			"stopbits", connector.StopBits)
 		if err != nil {
-			slog.Error("Error during auto detection", err)
+			slog.Error("Error during auto detection", "error", err)
 		}
 	}
 
 	// Run exporter
 	exporter := prom.LinkyExporter{Address: address, Port: port}
-	exporter.Run(connector)
+	exporter.Run(&connector)
 }

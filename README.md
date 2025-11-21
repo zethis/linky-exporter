@@ -1,9 +1,10 @@
 # Linky-exporter
 
-[![Build Status](https://travis-ci.com/syberalexis/linky-exporter.svg?branch=master)](https://travis-ci.com/syberalexis/linky-exporter)
-[![Go Report Card](https://goreportcard.com/badge/github.com/syberalexis/linky-exporter)](https://goreportcard.com/report/github.com/syberalexis/linky-exporter)
 
-This exporter get and expose French remote electrical information (Linky from EDF).
+[![Build Status](https://travis-ci.com/zethis/linky-exporter.svg?branch=master)](https://travis-ci.com/zethis/linky-exporter)
+[![Go Report Card](https://goreportcard.com/badge/github.com/zethis/linky-exporter)](https://goreportcard.com/report/github.com/zethis/linky-exporter)
+
+This exporter gets and exposes French remote electrical information (Linky from EDF). This is the maintained fork by zethis.
 
 ## Summary
 
@@ -29,11 +30,11 @@ This exporter get and expose French remote electrical information (Linky from ED
 
 ### From binary
 
-Download binary from [releases page](https://github.com/syberalexis/linky-exporter/releases)
+Download binary from [releases page](https://github.com/zethis/linky-exporter/releases)
 
 Example :
 ```bash
-curl -L https://github.com/syberalexis/linky-exporter/releases/download/v3.0.0/linky-exporter-3.0.0-linux-amd64 -o /usr/local/bin/linky-exporter
+curl -L https://github.com/zethis/linky-exporter/releases/latest/download/linky-exporter-linux-amd64 -o /usr/local/bin/linky-exporter
 chmod +x /usr/local/bin/linky-exporter
 /usr/local/bin/linky-exporter
 ```
@@ -41,14 +42,14 @@ chmod +x /usr/local/bin/linky-exporter
 ### From docker
 
 ```bash
-docker pull syberalexis/linky-exporter
-docker run -d -p 9901:9901 -v /dev/serial0:/dev/serial0 syberalexis/linky-exporter:3.0.0 --device /dev/serial0
+docker pull zethis/linky-exporter
+docker run -d -p 9901:9901 -v /dev/serial0:/dev/serial0 zethis/linky-exporter:latest --device /dev/serial0
 ```
 
 ### From sources
 
 ```bash
-git clone git@github.com:syberalexis/linky-exporter.git
+git clone git@github.com:zethis/linky-exporter.git
 cd linky-exporter
 go build cmd/linky-exporter/main.go -o linky-exporter
 ./linky-exporter --device /dev/serial0
@@ -57,10 +58,10 @@ go build cmd/linky-exporter/main.go -o linky-exporter
 or
 
 ```bash
-git clone git@github.com:syberalexis/linky-exporter.git
+git clone git@github.com:zethis/linky-exporter.git
 cd linky-exporter
-GOOS=linux GOARCH=amd64 VERSION=3.0.0 make clean build
-./dist/linky-exporter-3.0.0-linux-amd64 --device /dev/serial0
+GOOS=linux GOARCH=amd64 make clean build
+./dist/linky-exporter-linux-amd64 --device /dev/serial0
 ```
 
 ## Install as a service

@@ -32,13 +32,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload binaries to GitHub Release
-        if: steps.semantic.outputs.new_release_published == 'true'
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: "dist/*"
-          tag: ${{ steps.semantic.outputs.new_release_version }}
-          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:

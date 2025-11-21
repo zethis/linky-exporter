@@ -1,6 +1,5 @@
 # Linky-exporter
 
-
 [![Build Status](https://travis-ci.com/zethis/linky-exporter.svg?branch=master)](https://travis-ci.com/zethis/linky-exporter)
 [![Go Report Card](https://goreportcard.com/badge/github.com/zethis/linky-exporter)](https://goreportcard.com/report/github.com/zethis/linky-exporter)
 

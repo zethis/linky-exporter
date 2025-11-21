@@ -110,7 +110,7 @@ func safeUint64ToInt64(val uint64) int64 {
 	if val > math.MaxInt64 {
 		return math.MaxInt64
 	}
-	return safeUint64ToInt64(val)
+	return int64(val)
 }
 
 // safeUint64ToInt32 converts uint64 to int32 with overflow check
@@ -118,7 +118,7 @@ func safeUint64ToInt32(val uint64) int32 {
 	if val > math.MaxInt32 {
 		return math.MaxInt32
 	}
-	return safeUint64ToInt32(val)
+	return int32(val)
 }
 
 // safeUint64ToInt16 converts uint64 to int16 with overflow check
@@ -126,7 +126,7 @@ func safeUint64ToInt16(val uint64) int16 {
 	if val > math.MaxInt16 {
 		return math.MaxInt16
 	}
-	return safeUint64ToInt16(val)
+	return int16(val)
 }
 
 // safeUint64ToInt8 converts uint64 to int8 with overflow check
@@ -134,7 +134,7 @@ func safeUint64ToInt8(val uint64) int8 {
 	if val > math.MaxInt8 {
 		return math.MaxInt8
 	}
-	return safeUint64ToInt8(val)
+	return int8(val)
 }
 
 // Parse parameter with name and value

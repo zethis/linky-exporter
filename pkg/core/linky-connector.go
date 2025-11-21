@@ -121,7 +121,10 @@ func (connector *LinkyConnector) readSerial() ([][]string, error) {
 		// Collect data line by line
 		if started {
 			slog.Debug(line)
-			values = append(values, strings.FieldsFunc(line, func(r rune) bool { return r == 0x09 || r == ' ' }))
+			fields := strings.FieldsFunc(line, func(r rune) bool { return r == 0x09 || r == ' ' })
+			if len(fields) > 0 {
+				values = append(values, fields)
+			}
 		}
 
 		// Start reading data when block started

@@ -3,6 +3,15 @@
   "plugins": [
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
-    "@semantic-release/github"
+    [
+      "@semantic-release/github",
+      {
+        "assets": [
+          "dist/linky-exporter-linux-amd64",
+          "dist/linky-exporter-windows-amd64.exe",
+          "dist/linky-exporter-darwin-amd64"
+        ]
+      }
+    ]
   ]
 }

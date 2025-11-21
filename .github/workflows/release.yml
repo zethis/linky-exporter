@@ -21,6 +21,7 @@ jobs:
         run: |
           mkdir -p dist
           GOOS=linux GOARCH=amd64 go build -o dist/linky-exporter-linux-amd64 ./cmd/linky-exporter
+          GOOS=linux GOARCH=arm GOARM=7 go build -o dist/linky-exporter-linux-arm ./cmd/linky-exporter
           GOOS=windows GOARCH=amd64 go build -o dist/linky-exporter-windows-amd64.exe ./cmd/linky-exporter
           GOOS=darwin GOARCH=amd64 go build -o dist/linky-exporter-darwin-amd64 ./cmd/linky-exporter
 

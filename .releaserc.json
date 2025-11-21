@@ -8,6 +8,7 @@
       {
         "assets": [
           "dist/linky-exporter-linux-amd64",
+          "dist/linky-exporter-linux-arm",
           "dist/linky-exporter-windows-amd64.exe",
           "dist/linky-exporter-darwin-amd64"
         ]

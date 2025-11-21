@@ -8,7 +8,7 @@ on:
       - 'v*'
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -26,25 +26,18 @@ jobs:
           GOOS=windows GOARCH=amd64 go build -o dist/linky-exporter-windows-amd64.exe ./cmd/linky-exporter
           GOOS=darwin GOARCH=amd64 go build -o dist/linky-exporter-darwin-amd64 ./cmd/linky-exporter
 
-      - name: Upload release assets
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-binaries
-          path: dist/
-
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
       - name: Semantic Release
         uses: cycjimmy/semantic-release-action@v4
         with:
           branch: ${{ github.ref_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload binaries to GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "dist/*"
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:

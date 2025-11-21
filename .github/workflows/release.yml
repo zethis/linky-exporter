@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - master
-    tags:
-      - 'v*'
 
 jobs:
   release:
@@ -27,16 +25,19 @@ jobs:
           GOOS=darwin GOARCH=amd64 go build -o dist/linky-exporter-darwin-amd64 ./cmd/linky-exporter
 
       - name: Semantic Release
+        id: semantic
         uses: cycjimmy/semantic-release-action@v4
         with:
-          branch: ${{ github.ref_name }}
+          branch: master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload binaries to GitHub Release
+        if: steps.semantic.outputs.new_release_published == 'true'
         uses: ncipollo/release-action@v1
         with:
           artifacts: "dist/*"
+          tag: ${{ steps.semantic.outputs.new_release_version }}
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
